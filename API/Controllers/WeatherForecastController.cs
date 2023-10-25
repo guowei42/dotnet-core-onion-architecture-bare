@@ -1,8 +1,6 @@
 using Application.WeatherForecasts;
 using Domain;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Persistence;
 
 namespace API.Controllers;
 
@@ -32,8 +30,7 @@ public class WeatherForecastController : BaseApiController
     public async Task<IActionResult> EditWeatherForecase(Guid id, WeatherForecast weatherForecast)
     {
         weatherForecast.Id = id;
-        await Mediator.Send(new Edit.Command { WeatherForecast = weatherForecast });
-        return Ok();
+        return HandleResult(await Mediator.Send(new Edit.Command { WeatherForecast = weatherForecast }));
     }
 
     [HttpDelete("{id}")]
