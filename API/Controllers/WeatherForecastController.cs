@@ -1,33 +1,45 @@
+using Application.WeatherForecasts;
 using Domain;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Persistence;
 
 namespace API.Controllers;
 
-[ApiController]
-[Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class WeatherForecastController : BaseApiController
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
 
-    private readonly ILogger<WeatherForecastController> _logger;
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    [HttpGet]
+    public async Task<ActionResult<List<WeatherForecast>>> GetWeatherForecasts()
     {
-        _logger = logger;
+        return await Mediator.Send(new List.Query());
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpGet("{id}")]
+    public async Task<ActionResult<WeatherForecast>> GetWeatherForecast(Guid Id)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        return await Mediator.Send(new Details.Query{ Id = Id });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateWeatherForecase(WeatherForecast weatherForecast)
+    {
+        await Mediator.Send(new Create.Command { WeatherForecast = weatherForecast });
+        return Ok();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> EditWeatherForecase(Guid id, WeatherForecast weatherForecast)
+    {
+        weatherForecast.Id = id;
+        await Mediator.Send(new Edit.Command { WeatherForecast = weatherForecast });
+        return Ok();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> EditWeatherForecase(Guid id)
+    {
+        await Mediator.Send(new Delete.Command { Id = id });
+        return Ok();
     }
 }
