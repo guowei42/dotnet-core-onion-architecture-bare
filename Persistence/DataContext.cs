@@ -1,4 +1,4 @@
-﻿using API;
+﻿using Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
