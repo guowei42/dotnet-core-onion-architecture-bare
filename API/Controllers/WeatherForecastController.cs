@@ -10,20 +10,19 @@ public class WeatherForecastController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<List<WeatherForecast>>> GetWeatherForecasts()
     {
-        return await Mediator.Send(new List.Query());
+        return HandleResult(await Mediator.Send(new List.Query()));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<WeatherForecast>> GetWeatherForecast(Guid Id)
     {
-        return await Mediator.Send(new Details.Query{ Id = Id });
+        return HandleResult(await Mediator.Send(new Details.Query{ Id = Id }));
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateWeatherForecase(WeatherForecast weatherForecast)
     {
-        await Mediator.Send(new Create.Command { WeatherForecast = weatherForecast });
-        return Ok();
+        return HandleResult(await Mediator.Send(new Create.Command { WeatherForecast = weatherForecast }));
     }
 
     [HttpPut("{id}")]
@@ -34,9 +33,8 @@ public class WeatherForecastController : BaseApiController
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> EditWeatherForecase(Guid id)
+    public async Task<IActionResult> DeleteWeatherForecase(Guid id)
     {
-        await Mediator.Send(new Delete.Command { Id = id });
-        return Ok();
+        return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
     }
 }

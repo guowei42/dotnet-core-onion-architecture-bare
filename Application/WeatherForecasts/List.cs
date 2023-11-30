@@ -1,21 +1,17 @@
-﻿using Domain;
+﻿using Application.Core;
+using Domain;
 using MediatR;
-using MediatR.Wrappers;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Application.WeatherForecasts
 {
     public class List
     {
-        public class Query : IRequest<List<WeatherForecast>> { }
+        public class Query : IRequest<Result<List<WeatherForecast>>> { }
 
-        public class Handler : IRequestHandler<Query, List<WeatherForecast>>
+        public class Handler : IRequestHandler<Query, Result<List<WeatherForecast>>>
         {
             private readonly DataContext _context;
 
@@ -24,9 +20,9 @@ namespace Application.WeatherForecasts
                 _context = context;
             }
 
-            public async Task<List<WeatherForecast>> Handle(Query request, CancellationToken cancellation)
+            public async Task<Result<List<WeatherForecast>>> Handle(Query request, CancellationToken cancellation)
             {
-                return await _context.WeatherForecasts.ToListAsync();
+                return Result<List<WeatherForecast>>.Success(await _context.WeatherForecasts.ToListAsync(cancellation));
             }
         }
     }

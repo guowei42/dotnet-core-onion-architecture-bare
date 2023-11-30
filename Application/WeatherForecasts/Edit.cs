@@ -1,6 +1,7 @@
 ﻿using Application.Core;
 using AutoMapper;
 using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -11,6 +12,13 @@ namespace Application.WeatherForecasts
         public class Command : IRequest<Result<Unit>>
         {
             public WeatherForecast WeatherForecast { get; set; }
+        }
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.WeatherForecast).SetValidator(new WeatherForecastsValidator());
+            }
         }
 
         public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -32,7 +40,7 @@ namespace Application.WeatherForecasts
 
                 var result = await _context.SaveChangesAsync() > 0;
 
-                if (!result) return Result<Unit>.Failure("Failed to edit weather forecast");
+                if (!result) return Result<Unit>.Failure("Failed to update weather forecast");
 
                 return Result<Unit>.Success(Unit.Value);
 

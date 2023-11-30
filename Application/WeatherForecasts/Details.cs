@@ -1,22 +1,18 @@
-﻿using Domain;
+﻿using Application.Core;
+using Domain;
 using MediatR;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.WeatherForecasts
 {
     public class Details
     {
-        public class Query : IRequest<WeatherForecast>
+        public class Query : IRequest<Result<WeatherForecast>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, WeatherForecast>
+        public class Handler : IRequestHandler<Query, Result<WeatherForecast>>
         {
             private readonly DataContext _context;
 
@@ -24,9 +20,10 @@ namespace Application.WeatherForecasts
             {
                 _context = context;
             }
-            public async Task<WeatherForecast> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<WeatherForecast>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return await _context.WeatherForecasts.FindAsync(request.Id);
+                var activity = await _context.WeatherForecasts.FindAsync(request.Id);
+                return Result<WeatherForecast>.Success(activity);
             }
         }
     }

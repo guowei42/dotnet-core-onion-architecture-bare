@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Application.Core;
+using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -6,12 +8,20 @@ namespace Application.WeatherForecasts
 {
     public class Create
     {
-        public class Command: IRequest
+        public class Command: IRequest<Result<Unit>>
         {
             public WeatherForecast WeatherForecast { get; set; }
         }
         
-        public class Handler : IRequestHandler<Command>
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.WeatherForecast).SetValidator(new WeatherForecastsValidator());
+            }
+        }
+
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
 
@@ -19,10 +29,14 @@ namespace Application.WeatherForecasts
             {
                 _context = context;
             }
-            public async Task Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 _context.WeatherForecasts.Add(request.WeatherForecast);
-                await _context.SaveChangesAsync();
+                var result = await _context.SaveChangesAsync() > 0;
+
+                if (!result) return Result<Unit>.Failure("Failed to create weather forecast");
+
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }
